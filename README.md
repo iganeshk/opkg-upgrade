@@ -3,6 +3,8 @@ List and install OpenWRT / LEDE opkg upgradable packages.
 
 Little `ash` app for easier opkg package upgrades.
 
+Implemented ability to perform system upgrade (sysupgrade firmware) with backup flags and restore installed packages.
+
 **You should check for config conflicts after upgrades!**  
 **Make sure you have enough space on root before installing stuff!**  
 This script is small enough but SSL support for curl/wget is not!  
@@ -13,10 +15,6 @@ Upgrading development versions can soft-brick your device.
 You should try to backup your config and do a full install of a later snapshot if you are running dev/trunk.  
 Main releases are fine (just trunk/snapshots are affected by this).  
 It is probably the opposite for releases (recommended to upgrade), since you will get security patches if you upgrade those.
-  
----------------------------------------------- 
-#### If you want to support this project, you can provide me with some :coffee:  
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A9N3VU2DHP82A&source=url)  
 
 ----------------------------------------------  
   
