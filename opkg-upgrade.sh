@@ -1,18 +1,18 @@
 #!/bin/sh
 ###############################################
-# Gustavo Arnosti Neves
+# Gustavo Arnosti Neves // Ganesh Velu
 #
 # Created: May / 2017
-# Updated: Dec / 2018
+# Updated: Feb / 2019
 #
 # Upgrade packages listed by:
 # opkg list-upgradable
 #
 # Will list packages and ask for confirmation
 # Use ./opkg-upgrade.sh --help for more info
-#
-# This Script:
-# https://github.com/tavinus/opkg-upgrade
+# 
+# Perform sysupgrade with backup perserving /etc and /root and option to restore
+# https://github.com/iganeshk/opkg-upgrade
 
 
 ### Initialization
@@ -25,6 +25,7 @@ OPKGUP_INSTALL_DIR='/usr/sbin'
 OPENWRT_RELEASE="/etc/openwrt_release"
 ROUTER_NAME="$(uname -n)"
 HTML_FONT="font-family:'Trebuchet MS', Helvetica, sans-serif;"
+BACKUP_FILENAME="Backup-$HOSTNAME-$(date +%Y-%m-%d)"
 
 ### Silly SH
 TRUE=0
@@ -192,6 +193,10 @@ get_options() {
                 QUIET_MODE=$TRUE ; JUST_PRINT_HTML_FLAG=$TRUE ; shift ;;
             -s|--ssmtp)
                 ssmtp_check "$2" ; shift ; shift ;;
+            -res|-restore|--restore)
+                restore_packages ; exit 0 ;;
+            -sys|--sysupgrade)
+                perform_sysupgrade "$2" ; exit 0 ;;
             -a|--always-send|--always-Send|--alwayssend|--alwaysSend)
                 ALWAYS_SEND_FLAG=$TRUE ; shift ;;
             -t|--text-only|--text-Only|--textonly|--textOnly)
@@ -461,6 +466,39 @@ self_install() {
     echo "chmod executable: $status"
     echo $'\nInstalled with success, bye!\n'
     exit $?
+}
+
+
+
+###### PERFORM SYSUPGRADE
+
+# Backup current list of packages and upgrade firmware 
+perform_sysupgrade() {
+    if ! is_file "$2"; then
+        print_error $'\nPlease specify the sysupgrade firmware file'
+        exit 40
+    fi
+    # backup /etc, /root, and configs
+    sysupgrade -b "$BACKUP_FILENAME"
+    mv "$BACKUP_FILENAME" /"$BACKUP_FILENAME"
+    # upgrade while preserving configs, /etc, /root
+    sysupgrade -c -o -k "$2"
+}
+
+
+
+###### RESTORE PACKAGES
+
+# Restore package upon upgrade by using /etc/backup/installed_packages.txt 
+restore_packages() {
+    if ! is_file "/etc/backup/installed_packages.txt"; then
+        print_error $'\nFile not found: /etc/backup/installed_packages.txt'
+        exit 40
+    fi
+    echo "Attempting to restore packages from /etc/backup/installed_packages.txt"
+    opkg update
+    grep "\toverlay" /etc/backup/installed_packages.txt | cut -f1 | xargs -r opkg install
+    rm /etc/backup/installed_packages.txt
 }
 
 
