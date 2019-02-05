@@ -25,7 +25,7 @@ OPKGUP_INSTALL_DIR='/usr/sbin'
 OPENWRT_RELEASE="/etc/openwrt_release"
 ROUTER_NAME="$(uname -n)"
 HTML_FONT="font-family:'Trebuchet MS', Helvetica, sans-serif;"
-BACKUP_FILENAME="Backup-$HOSTNAME-$(date +%Y-%m-%d)"
+BACKUP_FILENAME="Backup-$HOSTNAME-$(date +%Y-%m-%d).tar.gz"
 
 ### Silly SH
 TRUE=0
@@ -474,15 +474,15 @@ self_install() {
 
 # Backup current list of packages and upgrade firmware 
 perform_sysupgrade() {
-    if ! is_file "$2"; then
+    if ! is_file "$1"; then
         print_error $'\nPlease specify the sysupgrade firmware file'
         exit 40
     fi
     # backup /etc, /root, and configs
     sysupgrade -b "$BACKUP_FILENAME"
-    mv "$BACKUP_FILENAME" /"$BACKUP_FILENAME"
+    mv "$BACKUP_FILENAME" /root/"$BACKUP_FILENAME"
     # upgrade while preserving configs, /etc, /root
-    sysupgrade -c -o -k "$2"
+    sysupgrade -c -o -k "$1"
 }
 
 
