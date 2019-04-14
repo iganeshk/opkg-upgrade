@@ -475,13 +475,16 @@ self_install() {
 # Backup current list of packages and upgrade firmware 
 perform_sysupgrade() {
     if ! is_file "$1"; then
-        print_error $'\nPlease specify the sysupgrade firmware file'
+        print_error $'\nPlease specify the sysupgrade firmware file path\n'
         exit 40
     fi
+    echo $'Performing Sysupgrade while saving all currently installed packages installed list. (/etc/backup/installed_packages.txt'
+    read -p '\nPress enter to continue'
     # backup /etc, /root, and configs
     sysupgrade -b "$BACKUP_FILENAME"
     mv "$BACKUP_FILENAME" /root/"$BACKUP_FILENAME"
-    # upgrade while preserving configs, /etc, /root
+    # upgrade while preserving configs, /etc, /root and installed packages list
+    # manual: opkg list-installed | cut -f 1 -d ' ' > /etc/config/installed_packages.txt
     sysupgrade -c -o -k "$1"
 }
 
